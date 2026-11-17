@@ -1,0 +1,14 @@
+{
+  "auc": 0.7725,
+  "acuracia": 0.6944,
+  "f1": 0.7176,
+  "precisao_churn": 0.4175,
+  "recall_churn": 0.789,
+  "linhas_bronze": 5000,
+  "linhas_silver": 4894,
+  "treino": 3958,
+  "teste": 936,
+  "taxa_churn_teste": 0.2329,
+  "pyspark": "4.3.0",
+  "python": "3.14.4"
+}

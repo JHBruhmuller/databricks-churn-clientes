@@ -1,1 +1,3 @@
-# Apenas para gerar os dados localmente; o notebook roda no Databricks (Spark já incluso).
+pyspark>=4.0
+pandas
+matplotlib

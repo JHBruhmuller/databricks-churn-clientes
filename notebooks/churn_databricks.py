@@ -49,9 +49,17 @@ etl = Pipeline(stages=indexers + [encoder, assembler, scaler])
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
 
+from pyspark.sql import functions as F
+
 treino, teste = df.randomSplit([0.8, 0.2], seed=42)
 
-rf = RandomForestClassifier(labelCol="churn", featuresCol="features",
+# Classes desbalanceadas (poucos clientes cancelam): pesa mais a classe churn no treino
+n_neg, n_pos = treino.filter("churn = 0").count(), treino.filter("churn = 1").count()
+peso_pos = n_neg / n_pos
+treino = treino.withColumn("peso", F.when(F.col("churn") == 1, F.lit(peso_pos)).otherwise(F.lit(1.0)))
+print(f"Treino: {n_pos} churn / {n_neg} permanecem (peso da classe churn = {peso_pos:.2f})")
+
+rf = RandomForestClassifier(labelCol="churn", featuresCol="features", weightCol="peso",
                             numTrees=150, maxDepth=8, seed=42)
 modelo = Pipeline(stages=etl.getStages() + [rf]).fit(treino)
 pred = modelo.transform(teste)
@@ -74,15 +82,18 @@ import pandas as pd
 
 nomes = numericas.copy()
 for est in modelo.stages[:len(categoricas)]:
-    nomes += [f"{est.getInputCol()}={v}" for v in est.labels[:-1]]  # OHE descarta a última categoria
-imp = pd.DataFrame({"variavel": nomes[:len(modelo.stages[-1].featureImportances)],
-                    "importancia": modelo.stages[-1].featureImportances.toArray()})
+    # handleInvalid="keep" cria uma categoria extra, que o OneHotEncoder descarta (dropLast)
+    nomes += [f"{est.getInputCol()}={v}" for v in est.labels]
+importancias = modelo.stages[-1].featureImportances.toArray()
+assert len(nomes) == len(importancias)
+imp = pd.DataFrame({"variavel": nomes, "importancia": importancias})
 display(imp.sort_values("importancia", ascending=False))
 
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ### Interpretação de negócio
-# MAGIC * **Contrato mensal, atrasos de pagamento e chamados de suporte** são os maiores sinais de cancelamento; clientes novos (poucos meses) também saem mais.
-# MAGIC * **Ação operacional:** priorizar a fila da retenção pelos clientes com maior `probability` de churn (tabela `churn_clientes_gold_predicoes`), oferecendo migração de contrato mensal para anual com desconto.
-# MAGIC * **Impacto:** retenção focada em um grupo menor e de maior risco reduz o custo por cliente retido frente a campanhas em massa. Compare o recall da classe churn com o custo do desconto para dimensionar o ROI.
+# MAGIC * **Quem cancela:** contrato mensal é o sinal mais forte, seguido do tempo de casa (clientes novos saem mais), chamados de suporte e atrasos de pagamento. Forma de pagamento e tipo de internet pesam pouco.
+# MAGIC * **Desempenho:** com as classes balanceadas, o modelo recupera cerca de 79% dos clientes que cancelam, ao custo de precisão baixa (~42%): muitos alertas são falsos positivos.
+# MAGIC * **Ação operacional:** ordenar a fila da retenção pela `probability` de churn (tabela `churn_clientes_gold_predicoes`). Abordar 44% da base captura 79% dos cancelamentos (cerca de 1,8x mais que uma abordagem aleatória), e a oferta de migração de contrato mensal para anual com desconto ataca o principal fator.
+# MAGIC * **Impacto:** a retenção deixa de ser campanha em massa e passa a ser focada. Para dimensionar o ROI, compare o desconto dado aos falsos positivos com a receita preservada nos verdadeiros positivos.
 # MAGIC * **Limites:** os dados são sintéticos (`gerar_dados.py`); confirme os resultados com dados reais antes de decidir.
