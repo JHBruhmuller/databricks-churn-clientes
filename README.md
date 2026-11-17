@@ -2,6 +2,8 @@
 
 Atividade de Ciência de Dados: pipeline completo numa operadora de telecom fictícia.
 
+**Notebook:** [notebooks/churn_databricks.py](https://github.com/CodePenguinsCorp/databricks-churn-clientes/blob/main/notebooks/churn_databricks.py)
+
 | Etapa | O que foi feito |
 |---|---|
 | Ingestão | `spark.read.csv()` → `saveAsTable` (Delta Lake, camada bronze) |
