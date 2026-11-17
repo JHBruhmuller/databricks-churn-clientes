@@ -2,6 +2,8 @@
 
 Atividade de Ciência de Dados: pipeline completo de ingestão, ETL e classificação em uma operadora de telecom fictícia, com leitura dos resultados para o negócio.
 
+[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/JHBruhmuller/databricks-churn-clientes/blob/main/Churn_Databricks_Colab.ipynb)
+
 **Instituição:** Católica de Santa Catarina
 
 **Disciplina:** Ciência de Dados
@@ -13,6 +15,8 @@ Atividade de Ciência de Dados: pipeline completo de ingestão, ETL e classifica
 ## Trabalho principal
 
 Abra **[notebooks/churn_databricks.py](notebooks/churn_databricks.py)**, um notebook no formato de código-fonte do Databricks (importe pelo menu **Import** do workspace). Ele contém as quatro etapas pedidas, com comentários e a interpretação de negócio.
+
+Para executar sem workspace, use a versão para Google Colab, **[Churn_Databricks_Colab.ipynb](Churn_Databricks_Colab.ipynb)**, gerada a partir do mesmo código (botão no início da página).
 
 **Problema:** prever quais clientes vão cancelar o contrato (`churn`) para que a retenção atue antes da saída, em vez de campanhas em massa.
 
@@ -59,6 +63,14 @@ Resultados no conjunto de teste (936 clientes, 218 deles com churn):
 3. Em **Workspace > Import**, importe `notebooks/churn_databricks.py`.
 4. Confira o `CAMINHO_CSV` na primeira célula de código e use **Run all** em um compute serverless.
 
+## Executar no Google Colab
+
+1. Clique no botão **Abrir no Colab** no início desta página ou use o [link direto](https://colab.research.google.com/github/JHBruhmuller/databricks-churn-clientes/blob/main/Churn_Databricks_Colab.ipynb).
+2. Escolha **Ambiente de execução > Executar tudo**.
+3. A primeira célula instala Java 17 e PySpark e baixa o CSV do GitHub; as demais repetem o pipeline do Databricks.
+
+No Colab o Spark roda em modo local e as tabelas são Parquet, não Delta Lake. A atividade foi pensada para o Databricks, e esta versão serve para reproduzir o pipeline.
+
 ## Executar localmente (opcional)
 
 Requer Java 17 ou superior e, no Windows, WSL ou Linux (o Spark precisa do `winutils` no Windows nativo).
@@ -76,6 +88,8 @@ O script roda o mesmo notebook e grava as métricas em `resultados/`. Localmente
 | Arquivo/pasta | Conteúdo |
 |---|---|
 | `notebooks/churn_databricks.py` | Notebook Databricks com ingestão, ETL, treino e interpretação. |
+| `Churn_Databricks_Colab.ipynb` | Versão para Google Colab, gerada por `gerar_colab.py`. |
+| `gerar_colab.py` | Converte o notebook do Databricks em `.ipynb` para o Colab. |
 | `dados/churn_clientes.csv` | Dataset sintético (5.000 clientes, com nulos propositais). |
 | `gerar_dados.py` | Gerador do dataset, com semente fixa. |
 | `executar_local.py` | Execução local com PySpark e exportação dos resultados. |
@@ -87,7 +101,8 @@ O script roda o mesmo notebook e grava as métricas em `resultados/`. Localmente
 ## Acesso ao projeto
 
 - **Repositório:** https://github.com/JHBruhmuller/databricks-churn-clientes
-- **Notebook:** https://github.com/JHBruhmuller/databricks-churn-clientes/blob/main/notebooks/churn_databricks.py
+- **Notebook (Databricks):** https://github.com/JHBruhmuller/databricks-churn-clientes/blob/main/notebooks/churn_databricks.py
+- **Executar no Colab:** https://colab.research.google.com/github/JHBruhmuller/databricks-churn-clientes/blob/main/Churn_Databricks_Colab.ipynb
 
 ## Referências
 
