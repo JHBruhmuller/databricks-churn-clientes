@@ -41,7 +41,7 @@ bronze, silver, teste, treino = (ns["df_raw"].count(), ns["df"].count(), ns["tes
 
 linhas = pred.groupBy("churn", "prediction").count().toPandas()
 linhas.to_csv(saida / "matriz_confusao.csv", index=False)
-imp.to_csv(saida / "importancia_variaveis.csv", index=False)
+imp[["variavel", "importancia"]].to_csv(saida / "importancia_variaveis.csv", index=False)
 tp = int(linhas.query("churn==1 and prediction==1")["count"].sum())
 fn = int(linhas.query("churn==1 and prediction==0")["count"].sum())
 fp = int(linhas.query("churn==0 and prediction==1")["count"].sum())
@@ -54,12 +54,6 @@ metricas = {
 }
 (saida / "metricas.json").write_text(json.dumps(metricas, indent=2, ensure_ascii=False), encoding="utf-8")
 
-topo = imp.head(8).iloc[::-1]
-fig, ax = plt.subplots(figsize=(7, 4))
-ax.barh(topo["variavel"], topo["importancia"], color="#1f6feb")
-ax.set_title("Importância das variáveis (Random Forest)")
-ax.set_xlabel("Importância")
-fig.tight_layout()
-fig.savefig(saida / "importancia_variaveis.png", dpi=130)
+ns["fig_resultados"].savefig(saida / "graficos_resultados.png", dpi=130)
 print(json.dumps(metricas, indent=2, ensure_ascii=False))
 spark.stop()

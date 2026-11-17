@@ -86,8 +86,46 @@ for est in modelo.stages[:len(categoricas)]:
     nomes += [f"{est.getInputCol()}={v}" for v in est.labels]
 importancias = modelo.stages[-1].featureImportances.toArray()
 assert len(nomes) == len(importancias)
-imp = pd.DataFrame({"variavel": nomes, "importancia": importancias})
-display(imp.sort_values("importancia", ascending=False))
+imp = pd.DataFrame({"variavel": nomes, "importancia": importancias}).sort_values("importancia", ascending=False)
+imp["importancia_%"] = (imp["importancia"] * 100).round(1)
+display(imp[["variavel", "importancia_%"]])
+
+# COMMAND ----------
+# MAGIC %md ### Gráficos: o que mais pesa e onde o modelo acerta
+
+# COMMAND ----------
+import matplotlib.pyplot as plt
+
+# Soma a importância das categorias de cada variável (ex.: contrato=Mensal + Anual + Bienal)
+por_variavel = (imp.assign(origem=imp["variavel"].str.split("=").str[0])
+                .groupby("origem")["importancia"].sum().sort_values() * 100)
+
+cm = (pred.groupBy("churn", "prediction").count().toPandas()
+      .pivot(index="churn", columns="prediction", values="count").fillna(0).astype(int))
+
+fig_resultados, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5), gridspec_kw={"width_ratios": [1.3, 1]})
+
+cores = ["#1f6feb" if v >= por_variavel.max() else "#9ecbff" for v in por_variavel]
+ax1.barh(por_variavel.index, por_variavel.values, color=cores)
+for y, v in enumerate(por_variavel.values):
+    ax1.text(v + 0.6, y, f"{v:.1f}%", va="center", fontsize=10)
+ax1.set_title("O que mais pesa na previsão de churn")
+ax1.set_xlabel("Importância (%)")
+ax1.set_xlim(0, por_variavel.max() * 1.15)
+ax1.spines[["top", "right"]].set_visible(False)
+
+ax2.imshow(cm.values, cmap="Blues")
+rotulos = [["Acertou (fica)", "Falso alarme"], ["Perdido (cancela)", "Acertou (cancela)"]]
+for i in range(2):
+    for j in range(2):
+        cor = "white" if cm.values[i, j] > cm.values.max() / 2 else "black"
+        ax2.text(j, i, f"{cm.values[i, j]}" + chr(10) + rotulos[i][j], ha="center", va="center", color=cor, fontsize=11)
+ax2.set_xticks([0, 1], ["Previsto: fica", "Previsto: cancela"])
+ax2.set_yticks([0, 1], ["Real: fica", "Real: cancela"])
+ax2.set_title("Matriz de confusão (conjunto de teste)")
+
+plt.tight_layout()
+plt.show()
 
 # COMMAND ----------
 # MAGIC %md

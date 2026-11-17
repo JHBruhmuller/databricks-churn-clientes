@@ -41,11 +41,11 @@ Resultados no conjunto de teste (936 clientes, 218 deles com churn):
 | **Real: fica** | 478 | 240 |
 | **Real: cancela** | 46 | 172 |
 
-![Importância das variáveis](resultados/importancia_variaveis.png)
+![Importância por variável e matriz de confusão](resultados/graficos_resultados.png)
 
 ## Interpretação para o negócio
 
-- **Quem cancela:** contrato mensal é o fator mais forte, seguido de tempo de casa (clientes novos saem mais), chamados de suporte e atrasos de pagamento. Forma de pagamento e tipo de internet pesam pouco.
+- **Quem cancela:** o tipo de contrato responde por cerca de metade da importância do modelo, com o contrato mensal à frente, seguido de tempo de casa (clientes novos saem mais), chamados de suporte e atrasos de pagamento. Forma de pagamento e tipo de internet pesam pouco.
 - **Ação operacional:** ordenar a fila da retenção pela probabilidade de churn. Abordar 44% da base (412 de 936) captura 79% dos cancelamentos, cerca de 1,8 vez mais que uma seleção aleatória. Migrar clientes do contrato mensal para o anual, com desconto, ataca o principal fator.
 - **Impacto:** a retenção passa de campanha em massa para ação focada. Para dimensionar o retorno, compare o desconto concedido aos 240 falsos positivos com a receita preservada pelos 172 verdadeiros positivos.
 - **Equilíbrio:** sem o balanceamento de classes, o recall do churn era de 15% (33 de 218), com acurácia aparente maior. Priorizamos recall porque deixar um cancelamento passar custa mais que um contato desnecessário.
@@ -81,7 +81,8 @@ O script roda o mesmo notebook e grava as métricas em `resultados/`. Localmente
 | `executar_local.py` | Execução local com PySpark e exportação dos resultados. |
 | `resultados/metricas.json` | Métricas, contagens de linhas e versões do ambiente. |
 | `resultados/matriz_confusao.csv` | Matriz de confusão no teste. |
-| `resultados/importancia_variaveis.csv` e `.png` | Importância das variáveis do Random Forest. |
+| `resultados/importancia_variaveis.csv` | Importância de cada variável do Random Forest. |
+| `resultados/graficos_resultados.png` | Gráficos de importância por variável e matriz de confusão. |
 | `requirements.txt` | Dependências da execução local. |
 
 ## Acesso ao projeto
